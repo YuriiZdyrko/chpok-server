@@ -1,7 +1,6 @@
-defmodule ChpokServer.RoomChannel do
+defmodule ChpokServer.StreamingChannel do
   use Phoenix.Channel
   require Logger
-  alias ChpokServer.FileChunksStore
 
   @doc """
   Authorize socket to subscribe and broadcast events on this channel & topic
@@ -10,7 +9,7 @@ defmodule ChpokServer.RoomChannel do
   `:ignore` to deny subscription/broadcast on this channel
   for the requested topic
   """
-  def join("rooms:lobby", message, socket) do
+  def join("streaming:lobby", message, socket) do
     Process.flag(:trap_exit, true)
     :timer.send_interval(5000, :ping)
     send(self, {:after_join, message})
@@ -18,7 +17,7 @@ defmodule ChpokServer.RoomChannel do
     {:ok, socket}
   end
 
-  def join("rooms:" <> _private_subtopic, _message, _socket) do
+  def join("streaming:" <> _private_subtopic, _message, _socket) do
     {:error, %{reason: "unauthorized"}}
   end
 
@@ -38,15 +37,11 @@ defmodule ChpokServer.RoomChannel do
   end
 
   def handle_in("new:msg", msg, socket) do
-    #TODO: Refactor and remove this crap :)
-    FileChunksStore.chunk(msg["msg"])
-    {:reply, :ok, socket}
     # broadcast! socket, "new:msg", %{user: msg["user"], body: msg["body"]}
     # {:reply, {:ok, %{msg: msg["body"]}}, assign(socket, :user, msg["user"])}
-  end
 
-  def handle_in("new:end", msg, socket) do
-    FileChunksStore.chunks_end()
-    {:reply, :ok, socket}
+    # TODO: how to aggregate messages? - msg will have end terminator
+    IO.inspect(msg)
+    {:noreply, socket}
   end
 end
