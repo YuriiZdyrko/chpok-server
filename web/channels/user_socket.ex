@@ -1,7 +1,8 @@
 defmodule ChpokServer.UserSocket do
   use Phoenix.Socket
 
-  channel "rooms:*", ChpokServer.RoomChannel
+  channel "seeders:*", ChpokServer.SeederChannel
+  channel "leachers:*", ChpokServer.LeacherChannel
 
   transport :websocket, Phoenix.Transports.WebSocket
   transport :longpoll, Phoenix.Transports.LongPoll

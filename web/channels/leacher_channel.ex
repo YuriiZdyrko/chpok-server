@@ -1,5 +1,6 @@
-defmodule ChpokServer.StreamingChannel do
+defmodule ChpokServer.LeacherChannel do
   use Phoenix.Channel
+  alias ChpokServer.SeederChannel
   require Logger
 
   @doc """
@@ -9,25 +10,22 @@ defmodule ChpokServer.StreamingChannel do
   `:ignore` to deny subscription/broadcast on this channel
   for the requested topic
   """
-  def join("streaming:lobby", message, socket) do
+  def join("leachers:" <> leacher, message, socket) do
+
+    IO.puts("Leacher #{leacher} joined")
+
     Process.flag(:trap_exit, true)
     :timer.send_interval(5000, :ping)
-    send(self, {:after_join, message})
+    send(self(), {:after_join, message})
 
     {:ok, socket}
   end
 
-  def join("streaming:" <> _private_subtopic, _message, _socket) do
-    {:error, %{reason: "unauthorized"}}
-  end
-
   def handle_info({:after_join, msg}, socket) do
-    broadcast! socket, "user:entered", %{user: msg["user"]}
     push socket, "join", %{status: "connected"}
     {:noreply, socket}
   end
   def handle_info(:ping, socket) do
-    push socket, "new:msg", %{user: "SYSTEM", body: "ping"}
     {:noreply, socket}
   end
 
@@ -36,12 +34,11 @@ defmodule ChpokServer.StreamingChannel do
     :ok
   end
 
-  def handle_in("new:msg", msg, socket) do
-    # broadcast! socket, "new:msg", %{user: msg["user"], body: msg["body"]}
-    # {:reply, {:ok, %{msg: msg["body"]}}, assign(socket, :user, msg["user"])}
-
-    # TODO: how to aggregate messages? - msg will have end terminator
-    IO.inspect(msg)
+  def handle_in("leaching_request", %{"seeder" => seeder, "leacher" => leacher}, socket) do
+    IO.puts("ACCEPTED leaching_request on server")
+    ChpokServer.Endpoint.broadcast_from! self(), "seeders:" <> seeder,
+        "leaching_request", %{leacher: leacher}
+    IO.puts("LEACHING REQUEST SENT TO SEEDER")
     {:noreply, socket}
   end
 end
