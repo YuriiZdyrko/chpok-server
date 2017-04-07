@@ -35,10 +35,11 @@ defmodule ChpokServer.LeacherChannel do
   end
 
   def handle_in("leaching_request", %{"seeder" => seeder, "leacher" => leacher}, socket) do
-    IO.puts("ACCEPTED leaching_request on server")
-    ChpokServer.Endpoint.broadcast_from! self(), "seeders:" <> seeder,
-        "leaching_request", %{leacher: leacher}
-    IO.puts("LEACHING REQUEST SENT TO SEEDER")
-    {:noreply, socket}
+    ChpokServer.Endpoint.broadcast(
+      "seeders:" <> seeder,
+      "leaching_request",
+      %{leacher: leacher}
+    )
+    {:reply, :leaching_request_handled, socket}
   end
 end

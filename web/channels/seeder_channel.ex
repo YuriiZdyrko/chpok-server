@@ -24,13 +24,12 @@ defmodule ChpokServer.SeederChannel do
   end
 
   def handle_in("new:msg", %{"leacher" => leacher} = msg, socket) do
-    IO.puts("HEYYEAH")
     ChpokServer.Endpoint.broadcast(
       "leachers:" <> leacher,
       "new:msg",
       msg
     )
-    {:noreply, socket}
+    {:reply, :new_msg_handled, socket}
   end
 
   def handle_info({:after_join, _msg}, socket) do
