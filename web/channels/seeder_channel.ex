@@ -23,10 +23,10 @@ defmodule ChpokServer.SeederChannel do
     {:ok, socket}
   end
 
-  def handle_in("new:msg", %{"leacher" => leacher} = msg, socket) do
+  def handle_in("new:" <> path, %{"leacher" => leacher} = msg, socket) do
     ChpokServer.Endpoint.broadcast(
       "leachers:" <> leacher,
-      "new:msg",
+      "new:" <> path,
       msg
     )
     {:reply, :new_msg_handled, socket}

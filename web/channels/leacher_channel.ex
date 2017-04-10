@@ -1,6 +1,5 @@
 defmodule ChpokServer.LeacherChannel do
   use Phoenix.Channel
-  alias ChpokServer.SeederChannel
   require Logger
 
   @doc """
@@ -21,7 +20,7 @@ defmodule ChpokServer.LeacherChannel do
     {:ok, socket}
   end
 
-  def handle_info({:after_join, msg}, socket) do
+  def handle_info({:after_join, _msg}, socket) do
     push socket, "join", %{status: "connected"}
     {:noreply, socket}
   end
@@ -42,4 +41,14 @@ defmodule ChpokServer.LeacherChannel do
     )
     {:reply, :leaching_request_handled, socket}
   end
+
+  def handle_in("ack:" <> path, %{"seeder" => seeder}, socket) do
+    ChpokServer.Endpoint.broadcast(
+      "seeders:" <> seeder,
+      "ack:" <> path,
+      %{}
+    )
+    {:reply, :leaching_request_handled, socket}
+  end
+
 end
