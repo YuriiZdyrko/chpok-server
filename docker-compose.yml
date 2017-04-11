@@ -12,13 +12,3 @@ web:
     - .:/app # Here we're mounting our project's root directory inside the container
   ports:
     - "4000:4000"
-
-test:
-  image: phoenixbootstrap_web # We're just using the already built `web` image here
-  env_file: .env
-  command: mix test # Run the entire test suite if no other command is specified
-  environment:
-    - MIX_ENV=test # That's key
-    - PORT=4001
-  volumes_from:
-    - web
